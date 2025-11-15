@@ -1,0 +1,153 @@
+# Setup Kubernetes on Amazon EKS
+
+You can follow same procedure in the official  AWS document [Getting started with Amazon EKS – eksctl](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html)   
+
+#### Pre-requisites: 
+  - an EC2 Instance 
+
+#### AWS EKS Setup 
+1. Setup kubectl   
+   a. Download kubectl version 1.20  
+   b. Grant execution permissions to kubectl executable   
+   c. Move kubectl onto /usr/local/bin   
+   d. Test that your kubectl installation was successful    
+   ```sh 
+
+
+   # Download the latest stable kubectl release
+   curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+
+   # Make the kubectl binary executable
+   chmod +x ./kubectl
+
+   # Move it to /usr/local/bin so it’s available system-wide
+   sudo mv ./kubectl /usr/local/bin/kubectl
+
+   kubectl version --client
+   
+2. Setup eksctl   
+   a. Download and extract the latest release   
+   b. Move the extracted binary to /usr/local/bin   
+   c. Test that your eksclt installation was successful   
+  
+# Download the latest eksctl release (tar.gz) and extract to /tmp
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+
+# Move the eksctl binary to /usr/local/bin for system-wide access
+sudo mv /tmp/eksctl /usr/local/bin
+
+# Verify installation
+eksctl version
+
+  
+3. Create an IAM Role and attache it to EC2 instance    
+   `Note: create IAM user with programmatic access if your bootstrap system is outside of AWS`   
+   IAM user should have access to   
+   IAM   
+   EC2   
+   VPC    
+   CloudFormation
+
+4. Create your cluster and nodes 
+   ```sh
+   eksctl create cluster --name cluster-name  \
+   --region region-name \
+   --node-type instance-type \
+   --nodes-min 2 \
+   --nodes-max 2 \ 
+   --zones <AZ-1>,<AZ-2>
+   
+   example:
+   eksctl create cluster --name charan --region us-east-1
+            (or)
+   eksctl create cluster --name charan --region us-east-1 --node-type t2.medium
+            (or)
+   eksctl create cluster --name charan --region us-east-1 --node-type t2.medium --nodes-min 2 --nodes-max 5
+
+
+5. Update the node group to enable auto-scaling:
+
+   Check existing node groups
+
+      eksctl get nodegroup --cluster charan
+
+   eksctl scale nodegroup --cluster <cluster-name> --name <nodegroup-name> --nodes-min 2 --nodes-max 5
+
+   Example:
+
+   eksctl scale nodegroup --cluster charan --name ng-f8651b54 --nodes-min 2 --nodes-max 5
+
+
+6. To delete the EKS clsuter 
+   ```sh 
+   eksctl delete cluster naresh --region ap-south-1
+   ```
+   
+7. Validate your cluster using by creating by checking nodes and by creating a pod 
+   ```sh 
+   kubectl get nodes
+   ```
+
+
+
+------- Docker and Minikube install process-----
+
+choose instance t2.medium    --2cpu 2gb ram required 
+sudo dnf install docker -y   -----Install Docker first
+
+sudo systemctl start docker.service ---to start thr docker service
+
+sudo systemctl enable docker.service  --- to enable docker
+
+sudo usermod -a -G docker ec2-user  --- to add the user ec2-user to the docker group 
+
+newgrp docker --to run new group make changes immediatly  
+
+ 
+ ------Minikube ------
+
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+to start minikube ---minikube start 
+to check status ----minikube status 
+
+
+----------kubectl-----------
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+
+chmod +x ./kubectl  -----Make the kubectl binary executable
+
+sudo mv ./kubectl /usr/local/bin/kubectl  ----sudo mv ./kubectl /usr/local/bin/kubectl
+
+
+--------Install Argo CD-----------
+1. Create a Namespace for Argo CD
+      kubectl create namespace argocd
+
+2. Install Argo CD
+      kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+3. To access the UI externally, change it to NodePort:
+      kubectl edit svc argocd-server -n argocd
+
+4. Retrieve the secret:
+      kubectl get secret argocd-initial-admin-secret -n argocd -o yaml
+
+5. the password:
+      echo "aERMUnlTcVM4MG1BVVQ1Zw==" | base64 --decode
+
+
+--------Install ingress-----------
+1. Create a Namespace for ingress
+      kubectl create namespace ingress-nginx
+
+2. Install ingress
+      kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+
+
+
+
+
