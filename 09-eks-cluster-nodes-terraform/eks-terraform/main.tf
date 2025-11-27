@@ -4,7 +4,7 @@ provider "aws" {
 
 #Creating IAM role for EKS
 resource "aws_iam_role" "master" {
-  name = "veera-eks-master1"
+  name = "charan-eks-master1"
 
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
@@ -36,7 +36,7 @@ resource "aws_iam_role_policy_attachment" "AmazonEKSVPCResourceController" {
 }
 
 resource "aws_iam_role" "worker" {
-  name = "veera-eks-worker1"
+  name = "charan-eks-worker1"
 
   assume_role_policy = jsonencode({
     "Version" : "2012-10-17",
@@ -53,7 +53,7 @@ resource "aws_iam_role" "worker" {
 }
 
 resource "aws_iam_policy" "autoscaler" {
-  name = "veera-eks-autoscaler-policy1"
+  name = "charan-eks-autoscaler-policy1"
   policy = jsonencode({
     "Version" : "2012-10-17",
     "Statement" : [
@@ -106,7 +106,7 @@ resource "aws_iam_role_policy_attachment" "autoscaler" {
 
 resource "aws_iam_instance_profile" "worker" {
   depends_on = [aws_iam_role.worker]
-  name       = "veera-eks-worker-new-profile1"
+  name       = "charan-eks-worker-new-profile1"
   role       = aws_iam_role.worker.name
 }
 
