@@ -21,3 +21,8 @@ override.tf.json
 # CLI config files
 .terraformrc
 terraform.rc
+
+# IntelliJ / PyCharm / WebStorm
+.idea/
+*.iml
+
