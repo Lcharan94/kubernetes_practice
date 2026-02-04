@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+  labels:
+    app: webapp
+    type: front-end
+spec:
+  containers:
+  - name: container-1
+    image: amazonlinux:2
+    command: ["sleep", "3600"]
